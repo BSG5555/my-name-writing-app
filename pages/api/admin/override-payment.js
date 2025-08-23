@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kgcsmozgrpnkxjlaxqnv.supabase.co';
-// MUST set SUPABASE_SERVICE_ROLE_KEY in your deployment environment (Vercel etc.); never commit it.
+// MUST set SUPABASE_SERVICE_ROLE_KEY in your deployment environment (Vercel etc.); never commit it .
 const supabaseServer = createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 export default async function handler(req, res) {
