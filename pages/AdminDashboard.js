@@ -1,10 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Input, Modal, Calendar, Table } from './components'; // Assume these are prebuilt
-import { toast } from 'react-hot-toast';
-import { getStatusForUser } from './utils/status';
-import { fetchDashboardData } from './api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table';
+import toast from 'react-hot-toast';
+import { getStatusForUser } from '@/utils/status';
 
-const AdminDashboard = () => {
+async function fetchDashboardData(selectedDate) {
+  // Placeholder mock; replace with real API call
+  return Promise.resolve([
+    { id: 'u1', name: 'Alice Example', email: 'alice@example.com', image: '', submissions: 5, approved: 5 },
+    { id: 'u2', name: 'Bob Sample', email: 'bob@example.com', image: '', submissions: 3, approved: 2 }
+  ]);
+}
+
+export default function AdminDashboard() {
   const [data, setData] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,27 +35,22 @@ const AdminDashboard = () => {
       .catch(() => toast.error('Failed to load data'));
   }, [selectedDate]);
 
-  const filteredData = data.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = data.filter(u =>
+    u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const paginatedData = filteredData.slice(page * pageSize, (page + 1) * pageSize);
+  const paginated = filtered.slice(page * pageSize, (page + 1) * pageSize);
 
   const exportToCSV = () => {
     const headers = ['Name', 'Email', 'Status'];
-    const rows = filteredData.map(user => [
-      user.name,
-      user.email,
-      getStatusForUser(user)
-    ]);
-    const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+    const rows = filtered.map(u => [u.name, u.email, getStatusForUser(u)]);
+    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'dashboard.csv';
-    link.click();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'dashboard.csv';
+    a.click();
     URL.revokeObjectURL(url);
   };
 
@@ -49,7 +61,7 @@ const AdminDashboard = () => {
         <Button onClick={exportToCSV}>Export CSV</Button>
       </div>
 
-      <Calendar selectedDate={selectedDate} onSelect={setSelectedDate} />
+      <Calendar selected={selectedDate} onSelect={setSelectedDate} />
 
       <Input
         placeholder="Search users..."
@@ -58,36 +70,62 @@ const AdminDashboard = () => {
         className="w-full md:w-1/2"
       />
 
-      <Table
-        data={paginatedData}
-        columns={[
-          { label: 'Name', accessor: 'name' },
-          { label: 'Email', accessor: 'email' },
-          {
-            label: 'Status',
-            render: user => getStatusForUser(user)
-          },
-          {
-            label: 'Image',
-            render: user => (
-              <Button onClick={() => setModalImage(user.image)}>Preview</Button>
-            )
-          }
-        ]}
-      />
+      <div className="border rounded-md overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Image</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginated.map(user => (
+              <TableRow key={user.id}>
+                <TableCell>{user.name}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>{getStatusForUser(user)}</TableCell>
+                <TableCell>
+                  {user.image ? (
+                    <Button variant="secondary" onClick={() => setModalImage(user.image)}>
+                      Preview
+                    </Button>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">N/A</span>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+            {paginated.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center text-sm text-muted-foreground">
+                  No users found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <div className="flex justify-center space-x-2">
         <Button disabled={page === 0} onClick={() => setPage(p => p - 1)}>Prev</Button>
-        <Button disabled={(page + 1) * pageSize >= filteredData.length} onClick={() => setPage(p => p + 1)}>Next</Button>
+        <Button disabled={(page + 1) * pageSize >= filtered.length} onClick={() => setPage(p => p + 1)}>Next</Button>
       </div>
 
       {modalImage && (
-        <Modal onClose={() => setModalImage(null)}>
-          <img src={modalImage} alt="Submission Preview" className="max-w-full" />
-        </Modal>
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center p-4"
+          onClick={() => setModalImage(null)}
+        >
+          <div className="bg-white rounded-md p-2 max-w-xl w-full" onClick={e => e.stopPropagation()}>
+            <img src={modalImage} alt="Preview" className="max-w-full h-auto mx-auto" />
+            <div className="text-right mt-2">
+              <Button variant="secondary" onClick={() => setModalImage(null)}>Close</Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
-};
-
-export default AdminDashboard;
+}
