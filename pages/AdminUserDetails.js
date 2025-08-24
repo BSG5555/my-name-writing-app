@@ -1,17 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/router';
 import { User } from '@/entities/User';
 import { Submission } from '@/entities/Submission';
 import { Payment } from '@/entities/Payment';
 import { AdminLog } from '@/entities/AdminLog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { differenceInDays, format, isSameDay, startOfDay, isBefore, subDays, addDays, isAfter } from 'date-fns';
+import {
+  differenceInDays,
+  format,
+  isSameDay,
+  startOfDay,
+  isBefore,
+  subDays,
+  addDays,
+  isAfter
+} from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { ArrowLeft, Unlock } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { toast } from 'react-hot-toast';
-import { useRouter } from 'next/router';
 
 export default function AdminUserDetails() {
   const [user, setUser] = useState(null);
@@ -20,9 +29,7 @@ export default function AdminUserDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [isUnlocking, setIsUnlocking] = useState(false);
   const router = useRouter();
-
-  // router.query is undefined on first render; destructure safely
-  const userId = router.query.userId;
+  const { userId } = router.query || {};
 
   const loadData = useCallback(async () => {
     if (!userId) return;
@@ -52,7 +59,7 @@ export default function AdminUserDetails() {
     if (!user) return;
     setIsUnlocking(true);
     try {
-      let missedDays = [];
+      const missedDays = [];
       let currentDay = startOfDay(new Date(user.created_date));
       const yesterday = startOfDay(subDays(new Date(), 1));
 
@@ -90,7 +97,7 @@ export default function AdminUserDetails() {
         await AdminLog.create({
           action: 'UNLOCK_UPLOAD',
           userId: user.id,
-          adminId: 'currentAdmin.id', // TODO: replace with actual admin ID
+          adminId: 'currentAdmin.id', // Replace with actual admin ID in real context
           timestamp: new Date().toISOString()
         });
 
