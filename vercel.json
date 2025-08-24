@@ -1,8 +1,1 @@
-{
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_RAZORPAY_KEY": "@razorpay_key"
-    }
-  },
-  "routes": []
-}
+{"routes":[]}
