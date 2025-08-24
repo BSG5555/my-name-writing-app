@@ -1,20 +1,20 @@
 import React from 'react';
 
-export function Table({ className = '', ...props }) {
-  return <table className={`w-full border-collapse text-sm ${className}`} {...props} />;
+export function Table({ children }) {
+  return <table className="min-w-full text-sm">{children}</table>;
 }
-export function TableHeader(props) {
-  return <thead {...props} />;
+export function TableHeader({ children }) {
+  return <thead className="bg-gray-100">{children}</thead>;
 }
-export function TableHead({ className = '', ...props }) {
-  return <th className={`text-left font-semibold p-2 border-b ${className}`} {...props} />;
+export function TableBody({ children }) {
+  return <tbody>{children}</tbody>;
 }
-export function TableBody(props) {
-  return <tbody {...props} />;
+export function TableRow({ children }) {
+  return <tr className="border-b last:border-0">{children}</tr>;
 }
-export function TableRow({ className = '', ...props }) {
-  return <tr className={`border-b last:border-b-0 ${className}`} {...props} />;
+export function TableHead({ children }) {
+  return <th className="px-4 py-2 text-left font-semibold">{children}</th>;
 }
-export function TableCell({ className = '', ...props }) {
-  return <td className={`p-2 align-middle ${className}`} {...props} />;
+export function TableCell({ children, ...props }) {
+  return <td className="px-4 py-2 align-top" {...props}>{children}</td>;
 }
