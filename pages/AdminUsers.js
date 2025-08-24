@@ -59,7 +59,6 @@ export default function AdminUsers() {
 
   const handleBulkAction = () => {
     toast.success(`Bulk action triggered for ${selectedUsers.length} users`);
-    // Implement actual bulk logic here
   };
 
   if (isLoading) {
@@ -72,7 +71,6 @@ export default function AdminUsers() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <UsersIcon className="w-8 h-8 text-emerald-600" />
@@ -88,7 +86,6 @@ export default function AdminUsers() {
         )}
       </div>
 
-      {/* Filters */}
       <Card className="bg-white shadow-sm">
         <CardContent className="p-4 space-y-4">
           <div className="relative">
@@ -116,7 +113,6 @@ export default function AdminUsers() {
         </CardContent>
       </Card>
 
-      {/* Users List */}
       <div className="space-y-4">
         {paginatedUsers.length > 0 ? (
           paginatedUsers.map(user => (
@@ -177,7 +173,6 @@ export default function AdminUsers() {
         )}
       </div>
 
-      {/* Pagination Controls */}
       {filteredUsers.length > USERS_PER_PAGE && (
         <div className="flex justify-center gap-2 mt-4">
           <Button
@@ -187,7 +182,7 @@ export default function AdminUsers() {
           >
             Previous
           </Button>
-            <Button
+          <Button
             disabled={currentPage * USERS_PER_PAGE >= filteredUsers.length}
             onClick={() => setCurrentPage(prev => prev + 1)}
             aria-label="Next page"
