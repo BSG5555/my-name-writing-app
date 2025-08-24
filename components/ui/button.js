@@ -1,21 +1,19 @@
 import React from 'react';
 
-export function Button({ className = '', variant = 'default', size = 'md', ...props }) {
+export function Button({ className = '', variant = 'default', ...props }) {
   const base =
-    'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:pointer-events-none';
+    'inline-flex items-center justify-center rounded-md border text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed';
   const variants = {
-    default: 'bg-emerald-600 text-white hover:bg-emerald-500',
-    outline: 'border border-emerald-600 text-emerald-600 hover:bg-emerald-50',
-    ghost: 'text-emerald-600 hover:bg-emerald-50',
-  };
-  const sizes = {
-    sm: 'h-8 px-3 text-sm',
-    md: 'h-10 px-4',
-    lg: 'h-12 px-6 text-lg',
+    default: 'bg-white hover:bg-gray-50 border-gray-300 text-gray-800',
+    primary: 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-600',
+    subtle: 'bg-gray-100 hover:bg-gray-200 border-transparent text-gray-800',
+    ghost: 'bg-transparent border-transparent hover:bg-gray-100',
+    danger: 'bg-red-600 hover:bg-red-500 text-white border-red-600',
+    outline: 'bg-white border-gray-300 text-gray-800 hover:bg-gray-50'
   };
   return (
     <button
-      className={`${base} ${variants[variant] || variants.default} ${sizes[size] || sizes.md} ${className}`}
+      className={`${base} ${variants[variant] || variants.default} px-3 py-1.5 ${className}`}
       {...props}
     />
   );
