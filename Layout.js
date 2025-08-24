@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { createPageUrl } from '@/utils';
 import { User } from '@/entities/User';
 import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-hot-toast';
-import { userNavItems, adminNavItems } from '@/config/navItems'; // Modularized nav items
+import { userNavItems, adminNavItems } from '@/config/navItems';
 
 function NavLink({ item, currentPath }) {
   const isActive = currentPath === item.url;
   return (
     <Link
-      to={item.url}
+      href={item.url}
       className={`flex flex-col items-center justify-center flex-1 p-3 transition-colors duration-200 ${
-        isActive ? 'text-emerald-600 bg-emerald-50 rounded-lg' : 'text-gray-500 hover:text-emerald-500'
+        isActive
+          ? 'text-emerald-600 bg-emerald-50 rounded-lg'
+          : 'text-gray-500 hover:text-emerald-500'
       }`}
       aria-label={`Navigate to ${item.title}`}
     >
@@ -26,8 +29,7 @@ function NavLink({ item, currentPath }) {
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -36,28 +38,28 @@ export default function Layout({ children, currentPageName }) {
         const currentUser = await User.me();
         setUser(currentUser);
 
-        if (currentUser.role === 'admin' && !location.pathname.startsWith('/Admin')) {
-          navigate(createPageUrl('AdminDashboard'), { replace: true });
-        } else if (currentUser.role === 'user' && location.pathname.startsWith('/Admin')) {
-          navigate(createPageUrl('MyProgress'), { replace: true });
+        if (currentUser.role === 'admin' && !router.pathname.startsWith('/Admin')) {
+          router.replace(createPageUrl('AdminDashboard'));
+        } else if (currentUser.role === 'user' && router.pathname.startsWith('/Admin')) {
+          router.replace(createPageUrl('MyProgress'));
         }
       } catch (error) {
         if (!['Home', 'Signup'].includes(currentPageName)) {
-          navigate(createPageUrl('Home'));
+          router.replace(createPageUrl('Home'));
         }
       } finally {
         setIsLoadingUser(false);
       }
     };
     fetchUser();
-  }, [location.pathname, navigate, currentPageName]);
+  }, [router.pathname, router, currentPageName]);
 
   const navItems = user?.role === 'admin' ? adminNavItems : userNavItems;
 
   const handleLogout = async () => {
     await User.logout();
-    toast.success("Logged out successfully");
-    navigate(createPageUrl('Home'));
+    toast.success('Logged out successfully');
+    router.push(createPageUrl('Home'));
     window.location.reload();
   };
 
@@ -123,47 +125,27 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
 
-      {isPublicPage && !user ? (
-        <div className="bg-emerald-50 min-h-screen">{children}</div>
-      ) : !user ? (
-        <div className="flex items-center justify-center min-h-screen bg-emerald-50">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-500"></div>
-        </div>
-      ) : (
-        <div className="flex flex-col h-screen bg-emerald-50 text-gray-800 font-sans dark:bg-gray-900 dark:text-white">
-          {/* Header */}
-          <header className="flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm border-b border-emerald-100 sticky top-0 z-20 dark:bg-gray-800 dark:border-gray-700">
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold text-emerald-700 dark:text-emerald-400">My Name Writing</h1>
-              <p className="font-samarkan text-sm md:text-base text-emerald-500 dark:text-emerald-300 -mt-1">
-                Swayam Nama Likitha Sankalpa
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
+      <div className="min-h-screen flex flex-col">
+        <main className="flex-1 p-4 md:p-6 max-w-3xl w-full mx-auto">
+          {children}
+        </main>
+
+        {!isPublicPage && !isLoadingUser && user && (
+          <nav className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-sm flex md:hidden">
+            {navItems.map(item => (
+              <NavLink key={item.title} item={item} currentPath={router.pathname} />
+            ))}
+            <button
               onClick={handleLogout}
               aria-label="Logout"
+              className="flex flex-col items-center justify-center flex-1 p-3 text-gray-500 hover:text-red-600"
             >
               <LogOut className="w-5 h-5" />
-            </Button>
-          </header>
-
-          {/* Main Content */}
-          <main className="flex-1 overflow-y-auto pb-20">
-            <div className="p-4 min-h-full">{children}</div>
-          </main>
-
-          {/* Bottom Navigation */}
-          <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-emerald-100 z-30 dark:bg-gray-800 dark:border-gray-700">
-            <div className="flex justify-around items-center h-16 px-2">
-              {navItems.map(item => (
-                <NavLink key={item.title} item={item} currentPath={location.pathname} />
-              ))}
-            </div>
+              <span className="text-xs md:text-sm font-medium mt-1">Logout</span>
+            </button>
           </nav>
-        </div>
-      )}
+        )}
+      </div>
     </>
   );
 }
