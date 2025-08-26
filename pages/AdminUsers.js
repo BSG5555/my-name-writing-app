@@ -3,7 +3,7 @@ import { User } from '@/entities/User';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 import { createPageUrl } from '@/utils';
 import { format } from 'date-fns';
 import { Search, Users as UsersIcon, UserCheck, Clock } from 'lucide-react';
@@ -18,7 +18,7 @@ export default function AdminUsers() {
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
-    const navigate = useNavigate();
+    const router = useRouter();
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -135,7 +135,7 @@ export default function AdminUsers() {
                                         </span>
                                     </div>
                                 </div>
-                                <div className="flex-1 min-w-0" onClick={() => navigate(createPageUrl(`AdminUserDetails?userId=${user.id}`))}>
+                                <div className="flex-1 min-w-0" onClick={() => router.push(createPageUrl(`AdminUserDetails?userId=${user.id}`))}>
                                     <div className="flex items-center justify-between">
                                         <h3 className="text-lg font-medium text-gray-900 truncate">
                                             {user.full_name || 'Unnamed User'}

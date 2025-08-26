@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 import { User } from '@/entities/User';
 import { Submission } from '@/entities/Submission';
 import { Payment } from '@/entities/Payment';
@@ -19,10 +19,9 @@ export default function AdminUserDetails() {
     const [payments, setPayments] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isUnlocking, setIsUnlocking] = useState(false);
-    const location = useLocation();
-    const navigate = useNavigate();
-
-    const userId = new URLSearchParams(location.search).get('userId');
+    const router = useRouter();
+    
+    const userId = router.query.userId;
 
     const loadData = useCallback(async () => {
         if (!userId) return;
@@ -115,7 +114,7 @@ export default function AdminUserDetails() {
         return (
             <div className="text-center py-10">
                 <p className="text-red-600">User not found.</p>
-                <Button onClick={() => navigate(createPageUrl('AdminUsers'))} className="mt-4" aria-label="Back to user list">
+                <Button onClick={() => router.push(createPageUrl('AdminUsers'))} className="mt-4" aria-label="Back to user list">
                     <ArrowLeft className="w-4 h-4 mr-2" /> Back to Users
                 </Button>
             </div>
@@ -132,7 +131,7 @@ export default function AdminUserDetails() {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between gap-4 mb-6">
-                <Button variant="outline" onClick={() => navigate(createPageUrl('AdminUsers'))} className="flex items-center gap-2" aria-label="Go back to user list">
+                <Button variant="outline" onClick={() => router.push(createPageUrl('AdminUsers'))} className="flex items-center gap-2" aria-label="Go back to user list">
                     <ArrowLeft className="w-4 h-4" /> Back
                 </Button>
                 <Button onClick={handleUnlockUpload} disabled={isUnlocking} className="bg-orange-500 hover:bg-orange-600" aria-label="Unlock all penalties for user">

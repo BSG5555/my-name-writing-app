@@ -3,11 +3,17 @@ import { useRouter } from 'next/router';
 import { User } from '@/entities/User';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export default function HomePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showLoginForm, setShowLoginForm] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -26,6 +32,28 @@ export default function HomePage() {
     };
     checkUser();
   }, [router]);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+
+    setIsLoggingIn(true);
+    setError(null);
+
+    try {
+      const user = await User.login(email, password);
+      const targetPage = user.role === 'admin' ? 'AdminDashboard' : 'MyProgress';
+      router.replace(createPageUrl(targetPage));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -60,13 +88,59 @@ export default function HomePage() {
         transition={{ duration: 0.7, delay: 0.5 }}
         className="mt-16 w-full max-w-xs"
       >
-        <button
-          aria-label="Login to your account"
-          className="w-full px-4 py-2 rounded-lg bg-white text-emerald-700 hover:bg-emerald-100 shadow-lg"
-          onClick={() => User.login()}
-        >
-          LOGIN
-        </button>
+        {!showLoginForm ? (
+          <Button
+            onClick={() => setShowLoginForm(true)}
+            className="w-full bg-white text-emerald-700 hover:bg-emerald-100 shadow-lg"
+          >
+            LOGIN
+          </Button>
+        ) : (
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoggingIn}
+              />
+            </div>
+            <div>
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isLoggingIn}
+              />
+            </div>
+            <div className="flex space-x-2">
+              <Button
+                type="submit"
+                disabled={isLoggingIn}
+                className="flex-1"
+              >
+                {isLoggingIn ? 'Logging in...' : 'Login'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowLoginForm(false);
+                  setEmail('');
+                  setPassword('');
+                  setError(null);
+                }}
+                disabled={isLoggingIn}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        )}
       </motion.div>
     </div>
   );

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { createPageUrl } from '@/utils';
 import { User } from '@/entities/User';
 import { LogOut } from 'lucide-react';
@@ -11,7 +12,7 @@ function NavLink({ item, currentPath }) {
   const isActive = currentPath === item.url;
   return (
     <Link
-      to={item.url}
+      href={item.url}
       className={`flex flex-col items-center justify-center flex-1 p-3 transition-colors duration-200 ${
         isActive ? 'text-emerald-600 bg-emerald-50 rounded-lg' : 'text-gray-500 hover:text-emerald-500'
       }`}
@@ -26,8 +27,7 @@ function NavLink({ item, currentPath }) {
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -36,28 +36,28 @@ export default function Layout({ children, currentPageName }) {
         const currentUser = await User.me();
         setUser(currentUser);
 
-        if (currentUser.role === 'admin' && !location.pathname.startsWith('/Admin')) {
-          navigate(createPageUrl('AdminDashboard'), { replace: true });
-        } else if (currentUser.role === 'user' && location.pathname.startsWith('/Admin')) {
-          navigate(createPageUrl('MyProgress'), { replace: true });
+        if (currentUser.role === 'admin' && !router.pathname.startsWith('/Admin')) {
+          router.replace(createPageUrl('AdminDashboard'));
+        } else if (currentUser.role === 'user' && router.pathname.startsWith('/Admin')) {
+          router.replace(createPageUrl('MyProgress'));
         }
       } catch (error) {
         if (!['Home', 'Signup'].includes(currentPageName)) {
-          navigate(createPageUrl('Home'));
+          router.push(createPageUrl('Home'));
         }
       } finally {
         setIsLoadingUser(false);
       }
     };
     fetchUser();
-  }, [location.pathname, navigate, currentPageName]);
+  }, [router.pathname, currentPageName]);
 
   const navItems = user?.role === 'admin' ? adminNavItems : userNavItems;
 
   const handleLogout = async () => {
     await User.logout();
     toast.success("Logged out successfully");
-    navigate(createPageUrl('Home'));
+    router.push(createPageUrl('Home'));
     window.location.reload();
   };
 
@@ -158,7 +158,7 @@ export default function Layout({ children, currentPageName }) {
           <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-emerald-100 z-30 dark:bg-gray-800 dark:border-gray-700">
             <div className="flex justify-around items-center h-16 px-2">
               {navItems.map(item => (
-                <NavLink key={item.title} item={item} currentPath={location.pathname} />
+                <NavLink key={item.title} item={item} currentPath={router.pathname} />
               ))}
             </div>
           </nav>
