@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '@/entities/User';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
 export default function HomePage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -16,7 +16,7 @@ export default function HomePage() {
         const user = await User.me();
         if (user) {
           const targetPage = user.role === 'admin' ? 'AdminDashboard' : 'MyProgress';
-          navigate(createPageUrl(targetPage), { replace: true });
+          router.replace(createPageUrl(targetPage));
         } else {
           setIsLoading(false);
         }
@@ -26,7 +26,7 @@ export default function HomePage() {
       }
     };
     checkUser();
-  }, [navigate]);
+  }, []);
 
   if (isLoading) {
     return (

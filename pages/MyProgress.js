@@ -10,7 +10,7 @@ import { format, startOfDay, isBefore, isSameDay, isAfter, addDays, subDays } fr
 import { Check, X, AlertTriangle, Upload, Send, FileImage } from 'lucide-react';
 import { ImagePreviewModal } from '@/components/ImagePreviewModal';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 import { calculateMissedDays } from '@/utils/progress';
 
 const WHATSAPP_ADMIN_NUMBER = '916362359655';

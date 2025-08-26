@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Input, Modal, Calendar, Table } from './components'; // Assume these are prebuilt
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Calendar } from '@/components/ui/calendar';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { toast } from 'react-hot-toast';
-import { getStatusForUser } from './utils/status';
-import { fetchDashboardData } from './api';
 
 const AdminDashboard = () => {
   const [data, setData] = useState([]);
@@ -11,6 +12,17 @@ const AdminDashboard = () => {
   const [modalImage, setModalImage] = useState(null);
   const [page, setPage] = useState(0);
   const pageSize = 10;
+
+  // Placeholder function for fetching dashboard data
+  const fetchDashboardData = async (date) => {
+    // This would typically fetch data from an API
+    return [];
+  };
+
+  // Placeholder function for getting user status
+  const getStatusForUser = (user) => {
+    return 'Active';
+  };
 
   useEffect(() => {
     fetchDashboardData(selectedDate)

@@ -1,6 +1,8 @@
 // Entity: Payment
 // Represents a payment for a submission, including manual and Razorpay modes.
 
+import { supabase } from '../supabaseClient.js';
+
 class Payment {
   /**
    * @param {Object} data
@@ -50,6 +52,135 @@ class Payment {
     this.submissionDate = submissionDate;
     this.notes = notes;
   }
+
+  /**
+   * Create a new payment
+   * @param {Object} paymentData - Payment data
+   * @returns {Promise<Payment>} - Created payment object
+   */
+  static async create(paymentData) {
+    try {
+      const { data, error } = await supabase
+        .from('payments')
+        .insert([paymentData])
+        .select()
+        .single();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return new Payment(data);
+    } catch (error) {
+      console.error('Error creating payment:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create multiple payments
+   * @param {Array} paymentsData - Array of payment data
+   * @returns {Promise<Payment[]>} - Array of created payment objects
+   */
+  static async bulkCreate(paymentsData) {
+    try {
+      const { data, error } = await supabase
+        .from('payments')
+        .insert(paymentsData)
+        .select();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return data.map(paymentData => new Payment(paymentData));
+    } catch (error) {
+      console.error('Error bulk creating payments:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update a payment
+   * @param {string} paymentId - Payment ID
+   * @param {Object} updateData - Data to update
+   * @returns {Promise<Payment>} - Updated payment object
+   */
+  static async update(paymentId, updateData) {
+    try {
+      const { data, error } = await supabase
+        .from('payments')
+        .update(updateData)
+        .eq('id', paymentId)
+        .select()
+        .single();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return new Payment(data);
+    } catch (error) {
+      console.error('Error updating payment:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all payments
+   * @returns {Promise<Payment[]>} - Array of payment objects
+   */
+  static async list() {
+    try {
+      const { data, error } = await supabase
+        .from('payments')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return data.map(paymentData => new Payment(paymentData));
+    } catch (error) {
+      console.error('Error listing payments:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Filter payments based on criteria
+   * @param {Object} filters - Filter criteria
+   * @returns {Promise<Payment[]>} - Array of filtered payment objects
+   */
+  static async filter(filters = {}) {
+    try {
+      let query = supabase.from('payments').select('*');
+
+      // Apply filters
+      if (filters.userId) {
+        query = query.eq('userId', filters.userId);
+      }
+      if (filters.status) {
+        query = query.eq('status', filters.status);
+      }
+      if (filters.mode) {
+        query = query.eq('mode', filters.mode);
+      }
+
+      const { data, error } = await query.order('date', { ascending: false });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return data.map(paymentData => new Payment(paymentData));
+    } catch (error) {
+      console.error('Error filtering payments:', error);
+      throw error;
+    }
+  }
 }
 
 export default Payment;
+export { Payment };
